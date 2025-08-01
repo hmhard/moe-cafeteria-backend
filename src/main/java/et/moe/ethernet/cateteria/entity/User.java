@@ -8,6 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -90,6 +92,29 @@ public class User implements UserDetails {
     }
     
     public enum UserRole {
-        ADMIN, MANAGER, OPERATOR
+        ADMIN, MANAGER, OPERATOR;
+        
+        @JsonValue
+        public String toJson() {
+            return this.name().toLowerCase();
+        }
+        
+        @JsonCreator
+        public static UserRole fromJson(String value) {
+            if (value == null) {
+                return OPERATOR; // default value
+            }
+            try {
+                return UserRole.valueOf(value.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Try to match case-insensitively
+                for (UserRole role : UserRole.values()) {
+                    if (role.name().equalsIgnoreCase(value)) {
+                        return role;
+                    }
+                }
+                throw new IllegalArgumentException("Invalid UserRole: " + value);
+            }
+        }
     }
 } 

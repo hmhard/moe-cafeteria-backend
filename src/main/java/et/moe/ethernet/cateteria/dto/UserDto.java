@@ -32,7 +32,7 @@ public class UserDto {
             user.getUsername(),
             user.getEmail(),
             user.getFullName(),
-            user.getRole().name(),
+            user.getRole().name().toLowerCase(),
             user.isActive(),
             user.getCreatedAt(),
             user.getUpdatedAt(),

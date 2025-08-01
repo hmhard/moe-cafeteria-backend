@@ -29,6 +29,11 @@ public class MealRecordDto {
     private LocalDateTime timestamp;
     private LocalDateTime createdAt;
     
+    // User information
+    private String recordedByUserId;
+    private String recordedByUsername;
+    private String recordedByFullName;
+    
     public static MealRecordDto fromEntity(MealRecord mealRecord) {
         return new MealRecordDto(
             mealRecord.getId(),
@@ -45,7 +50,10 @@ public class MealRecordDto {
             mealRecord.getSupportAmount(),
             mealRecord.getEmployeeSalary(),
             mealRecord.getRecordedAt(),
-            mealRecord.getCreatedAt()
+            mealRecord.getCreatedAt(),
+            mealRecord.getRecordedByUser() != null ? mealRecord.getRecordedByUser().getId() : null,
+            mealRecord.getRecordedByUser() != null ? mealRecord.getRecordedByUser().getUsername() : null,
+            mealRecord.getRecordedByUser() != null ? mealRecord.getRecordedByUser().getFullName() : null
         );
     }
 } 

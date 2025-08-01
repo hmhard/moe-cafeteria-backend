@@ -7,6 +7,8 @@ import et.moe.ethernet.cateteria.entity.*;
 import et.moe.ethernet.cateteria.repository.MealRecordRepository;
 import et.moe.ethernet.cateteria.repository.SupportConfigRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,6 +26,7 @@ public class MealRecordService {
     private final EmployeeService employeeService;
     private final MealCategoryService mealCategoryService;
     private final SupportConfigRepository supportConfigRepository;
+    private final UserService userService;
     
     public List<MealRecordDto> getAllMealRecords() {
         return mealRecordRepository.findAllOrderByRecordedAtDesc().stream()
@@ -98,6 +101,13 @@ public class MealRecordService {
         mealRecord.setSupportAmount(pricing.supportAmount);
         mealRecord.setEmployeeSalary(employee.getSalary());
         mealRecord.setRecordedAt(LocalDateTime.now());
+        
+        // Set the current user who recorded the meal
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            String username = authentication.getName();
+            userService.findByUsername(username).ifPresent(mealRecord::setRecordedByUser);
+        }
         
         MealRecord savedRecord = mealRecordRepository.save(mealRecord);
         return MealRecordDto.fromEntity(savedRecord);

@@ -28,10 +28,10 @@ public class DataInitializer implements CommandLineRunner {
         log.info("Initializing database with sample data...");
         
         // Initialize meal types
-        initializeMealTypes();
+        // initializeMealTypes();
         
         // Initialize meal categories
-        initializeMealCategories();
+        // initializeMealCategories();
         
         // Initialize employees
         initializeEmployees();

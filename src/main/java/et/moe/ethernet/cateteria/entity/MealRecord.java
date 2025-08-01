@@ -34,6 +34,10 @@ public class MealRecord {
     @JoinColumn(name = "meal_category_id", nullable = false)
     private MealCategory mealCategory;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recorded_by_user_id")
+    private User recordedByUser;
+    
     @Column(name = "meal_name", nullable = false, length = 100)
     private String mealName;
     

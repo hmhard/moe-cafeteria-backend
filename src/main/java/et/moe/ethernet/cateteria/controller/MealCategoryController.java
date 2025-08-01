@@ -21,7 +21,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/meal-categories")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 @Tag(name = "Meal Categories", description = "Operations for managing meal categories (fasting/non-fasting)")
 public class MealCategoryController {
     

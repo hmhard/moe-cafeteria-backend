@@ -23,7 +23,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/meal-records")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 @Tag(name = "Meal Records", description = "Operations for recording and retrieving meal transactions")
 public class MealRecordController {
     

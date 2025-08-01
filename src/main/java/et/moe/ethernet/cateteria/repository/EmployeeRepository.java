@@ -1,6 +1,8 @@
 package et.moe.ethernet.cateteria.repository;
 
 import et.moe.ethernet.cateteria.entity.Employee;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -23,6 +25,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     Optional<Employee> findByShortCodeAndIsActiveTrue(String shortCode);
     
     List<Employee> findByIsActiveTrue();
+    
+    Page<Employee> findByIsActiveTrue(Pageable pageable);
     
     List<Employee> findByDepartment(String department);
     

@@ -12,7 +12,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/support-config")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class SupportConfigController {
     
     private final SupportConfigRepository supportConfigRepository;

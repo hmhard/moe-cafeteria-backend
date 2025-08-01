@@ -22,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/employees")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 @Tag(name = "Employees", description = "Operations for managing employees and their support eligibility")
 public class EmployeeController {
     

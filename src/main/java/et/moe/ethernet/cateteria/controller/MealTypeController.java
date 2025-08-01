@@ -20,7 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/meal-types")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 @Tag(name = "Meal Types", description = "Operations for managing meal types (breakfast, lunch, etc.)")
 public class MealTypeController {
     

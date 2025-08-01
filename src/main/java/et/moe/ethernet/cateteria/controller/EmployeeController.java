@@ -280,4 +280,54 @@ public class EmployeeController {
         List<EmployeeDto> employees = employeeService.getEligibleEmployeesForSupport();
         return ResponseEntity.ok(employees);
     }
+    
+    @PostMapping("/{id}/assign-card")
+    @Operation(
+        summary = "Assign card to employee",
+        description = "Assign a card ID and short code to an employee by searching with short code and updating their card ID. Requires authentication."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully assigned card to employee"),
+        @ApiResponse(responseCode = "404", description = "Employee not found"),
+        @ApiResponse(responseCode = "400", description = "Bad request - Invalid data"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required")
+    })
+    public ResponseEntity<EmployeeDto> assignCardToEmployee(
+        @Parameter(description = "Employee UUID", example = "123e4567-e89b-12d3-a456-426614174000")
+        @PathVariable String id,
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Card assignment request",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = CardAssignmentRequest.class),
+                examples = @ExampleObject(
+                    name = "Card Assignment Example",
+                    value = """
+                        {
+                          "cardId": "121212",
+                          "shortCode": "8167"
+                        }
+                        """
+                )
+            )
+        )
+        @RequestBody CardAssignmentRequest request
+    ) {
+        return employeeService.assignCardToEmployee(id, request.getCardId(), request.getShortCode())
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+    
+    // DTO for card assignment request
+    public static class CardAssignmentRequest {
+        private String cardId;
+        private String shortCode;
+        
+        // Getters and setters
+        public String getCardId() { return cardId; }
+        public void setCardId(String cardId) { this.cardId = cardId; }
+        public String getShortCode() { return shortCode; }
+        public void setShortCode(String shortCode) { this.shortCode = shortCode; }
+    }
 } 

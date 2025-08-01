@@ -204,4 +204,29 @@ public class EmployeeService {
                     .collect(Collectors.toList());
             });
     }
+    
+    public Optional<EmployeeDto> assignCardToEmployee(String employeeId, String cardId, String shortCode) {
+        // First, find the employee by the provided shortCode
+        Optional<Employee> employeeByShortCode = employeeRepository.findByShortCodeAndIsActiveTrue(shortCode);
+        
+        if (employeeByShortCode.isEmpty()) {
+            return Optional.empty(); // Employee not found with the provided shortCode
+        }
+        
+        Employee employee = employeeByShortCode.get();
+        
+        // Check if the cardId is already assigned to another employee
+        if (cardId != null && !cardId.equals(employee.getCardId())) {
+            Optional<Employee> existingEmployeeWithCard = employeeRepository.findByCardIdAndIsActiveTrue(cardId);
+            if (existingEmployeeWithCard.isPresent() && !existingEmployeeWithCard.get().getId().equals(employee.getId())) {
+                throw new RuntimeException("Card ID already assigned to another employee");
+            }
+        }
+        
+        // Update the employee's cardId
+        employee.setCardId(cardId);
+        Employee savedEmployee = employeeRepository.save(employee);
+        
+        return Optional.of(EmployeeDto.fromEntity(savedEmployee, isEligibleForSupport(savedEmployee)));
+    }
 } 

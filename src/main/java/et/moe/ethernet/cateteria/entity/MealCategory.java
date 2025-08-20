@@ -39,6 +39,9 @@ public class MealCategory {
     @Column(name = "supported_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal supportedPrice;
     
+    @Column(name = "allowed_count", nullable = false)
+    private Integer allowedCount = 1; // Default to 1 item allowed
+    
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
     

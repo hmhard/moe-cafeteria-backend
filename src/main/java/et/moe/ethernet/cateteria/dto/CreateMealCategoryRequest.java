@@ -18,6 +18,9 @@ public class CreateMealCategoryRequest {
     private BigDecimal normalPrice;
     private BigDecimal supportedPrice;
     
+    @JsonProperty("allowedCount")
+    private Integer allowedCount = 1;
+    
     @JsonProperty("isActive")
     private boolean isActive = true;
 } 

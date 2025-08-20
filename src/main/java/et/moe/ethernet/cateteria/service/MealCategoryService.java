@@ -59,6 +59,7 @@ public class MealCategoryService {
         mealCategory.setCategory(MealCategory.MealCategoryType.valueOf(request.getCategory().toUpperCase()));
         mealCategory.setNormalPrice(request.getNormalPrice());
         mealCategory.setSupportedPrice(request.getSupportedPrice());
+        mealCategory.setAllowedCount(request.getAllowedCount() != null ? request.getAllowedCount() : 1);
         mealCategory.setActive(request.isActive());
         
         MealCategory savedCategory = mealCategoryRepository.save(mealCategory);
@@ -71,6 +72,7 @@ public class MealCategoryService {
                 existingCategory.setName(mealCategoryUpdates.getName());
                 existingCategory.setNormalPrice(mealCategoryUpdates.getNormalPrice());
                 existingCategory.setSupportedPrice(mealCategoryUpdates.getSupportedPrice());
+                existingCategory.setAllowedCount(mealCategoryUpdates.getAllowedCount() != null ? mealCategoryUpdates.getAllowedCount() : 1);
                 existingCategory.setActive(mealCategoryUpdates.isActive());
                 return MealCategoryDto.fromEntity(mealCategoryRepository.save(existingCategory));
             });

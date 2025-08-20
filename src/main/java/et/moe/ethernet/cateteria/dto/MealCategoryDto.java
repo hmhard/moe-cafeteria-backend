@@ -21,6 +21,9 @@ public class MealCategoryDto {
     private BigDecimal normalPrice;
     private BigDecimal supportedPrice;
     
+    @JsonProperty("allowedCount")
+    private Integer allowedCount;
+    
     @JsonProperty("isActive")
     private boolean isActive;
     
@@ -35,6 +38,7 @@ public class MealCategoryDto {
             mealCategory.getName(),
             mealCategory.getNormalPrice(),
             mealCategory.getSupportedPrice(),
+            mealCategory.getAllowedCount(),
             mealCategory.isActive(),
             mealCategory.getCreatedAt(),
             mealCategory.getUpdatedAt()

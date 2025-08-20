@@ -28,6 +28,7 @@ public class MealRecordDto {
     private BigDecimal employeeSalary;
     private LocalDateTime timestamp;
     private LocalDateTime createdAt;
+    private String orderNumber;
     
     // User information
     private String recordedByUserId;
@@ -51,6 +52,7 @@ public class MealRecordDto {
             mealRecord.getEmployeeSalary(),
             mealRecord.getRecordedAt(),
             mealRecord.getCreatedAt(),
+            mealRecord.getOrderNumber(),
             mealRecord.getRecordedByUser() != null ? mealRecord.getRecordedByUser().getId() : null,
             mealRecord.getRecordedByUser() != null ? mealRecord.getRecordedByUser().getUsername() : null,
             mealRecord.getRecordedByUser() != null ? mealRecord.getRecordedByUser().getFullName() : null

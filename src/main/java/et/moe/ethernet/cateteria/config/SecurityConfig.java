@@ -41,8 +41,10 @@ public class SecurityConfig {
                 .requestMatchers("/employees/by-code/**").permitAll()
                 .requestMatchers("/meal-records/record").permitAll()
                 .requestMatchers("/meal-records/check-duplicate").permitAll()
+                .requestMatchers("/meal-records/**/receipt").permitAll()
                 .requestMatchers("/support-config").permitAll()
                 .requestMatchers("/support-reports/**").permitAll()
+                .requestMatchers("/api/print/**").permitAll()
                 // All other endpoints require authentication
                 .anyRequest().authenticated()
             )

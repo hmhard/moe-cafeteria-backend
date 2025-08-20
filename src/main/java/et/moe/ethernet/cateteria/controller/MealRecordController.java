@@ -2,6 +2,7 @@ package et.moe.ethernet.cateteria.controller;
 
 import et.moe.ethernet.cateteria.dto.MealRecordDto;
 import et.moe.ethernet.cateteria.service.MealRecordService;
+import et.moe.ethernet.cateteria.service.PrintService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,6 +28,7 @@ import java.util.Map;
 public class MealRecordController {
     
     private final MealRecordService mealRecordService;
+    private final PrintService printService;
     
     @GetMapping
     @Operation(
@@ -196,6 +198,46 @@ public class MealRecordController {
         try {
             MealRecordDto record = mealRecordService.recordMeal(cardId, mealCategoryId);
             return ResponseEntity.ok(record);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", e.getMessage()
+            ));
+        }
+    }
+    
+    @GetMapping("/{id}/receipt")
+    @Operation(
+        summary = "Get receipt text for a meal record",
+        description = "Generate receipt text for a specific meal record. This endpoint is publicly accessible for receipt printing."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully generated receipt text"),
+        @ApiResponse(responseCode = "404", description = "Meal record not found"),
+        @ApiResponse(responseCode = "400", description = "Bad request - Invalid parameters")
+    })
+    public ResponseEntity<Object> getReceiptText(
+        @Parameter(description = "Meal record UUID", example = "123e4567-e89b-12d3-a456-426614174000")
+        @PathVariable String id,
+        @Parameter(description = "Receipt format", example = "simple")
+        @RequestParam(defaultValue = "detailed") String format
+    ) {
+        try {
+            MealRecordDto mealRecord = mealRecordService.getMealRecordById(id)
+                .orElseThrow(() -> new RuntimeException("Meal record not found"));
+            
+            String receiptText;
+            if ("simple".equalsIgnoreCase(format)) {
+                receiptText = printService.generateSimpleReceiptText(mealRecord);
+            } else {
+                receiptText = printService.generateReceiptText(mealRecord);
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "receiptText", receiptText,
+                "orderNumber", mealRecord.getOrderNumber(),
+                "timestamp", mealRecord.getTimestamp(),
+                "format", format
+            ));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of(
                 "error", e.getMessage()

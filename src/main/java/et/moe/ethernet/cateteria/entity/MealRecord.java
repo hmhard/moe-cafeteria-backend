@@ -70,12 +70,25 @@ public class MealRecord {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
+    @Column(name = "order_number", unique = true)
+    private String orderNumber;
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (recordedAt == null) {
             recordedAt = LocalDateTime.now();
         }
+        if (orderNumber == null) {
+            orderNumber = generateOrderNumber();
+        }
+    }
+    
+    private String generateOrderNumber() {
+        // Generate order number in format: ORD-YYYYMMDD-XXXX
+        // where XXXX is a sequential number for the day
+        String datePrefix = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return "ORD-" + datePrefix + "-" + System.currentTimeMillis() % 10000;
     }
     
     public enum PriceType {

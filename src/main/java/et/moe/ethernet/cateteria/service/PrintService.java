@@ -31,12 +31,12 @@ public class PrintService {
         String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("M/d/yyyy"));
         
-        // Generate simplified receipt content with only requested fields
-        // receipt.append("MOE CAFETERIA\n");
-        // receipt.append("Order: ").append(mealRecord.getOrderNumber()).append("\n");
-        // receipt.append("Date: ").append(currentDate).append("\n");
-        // receipt.append("Time: ").append(currentTime).append("\n");
-        receipt.append("Employee: ").append(employee.getName()).append("\n");
+        // Generate simplified receipt content with only requested fields - ensure UTF-8 encoding
+        receipt.append("MOE CAFETERIA\n");
+        receipt.append("Order: ").append(mealRecord.getOrderNumber()).append("\n");
+        receipt.append("Date: ").append(currentDate).append("\n");
+        receipt.append("Time: ").append(currentTime).append("\n");
+        receipt.append("Employee: ").append(employee.getShortCode()).append("\n");
         receipt.append("Meal Type: ").append(mealRecord.getMealTypeId()).append("\n");
         receipt.append("Meal Category: ").append(mealCategory.getName()).append("\n");
         receipt.append("Actual Price: ").append(String.format("%.2f", mealRecord.getActualPrice())).append(" ETB\n");
@@ -59,12 +59,12 @@ public class PrintService {
         String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("M/d/yyyy"));
         
-        // Generate simplified receipt content with only requested fields
+        // Generate simplified receipt content with only requested fields - ensure UTF-8 encoding
         receipt.append("MOE CAFETERIA\n");
         receipt.append("Order: ").append(mealRecord.getOrderNumber()).append("\n");
         receipt.append("Date: ").append(currentDate).append("\n");
         receipt.append("Time: ").append(currentTime).append("\n");
-        receipt.append("Employee: ").append(employee.getName()).append("\n");
+        receipt.append("Employee: ").append(employee.getShortCode()).append("\n");
         receipt.append("Meal Type: ").append(mealRecord.getMealTypeId()).append("\n");
         receipt.append("Meal Category: ").append(mealCategory.getName()).append("\n");
         receipt.append("Actual Price: ").append(String.format("%.2f", mealRecord.getActualPrice())).append(" ETB\n");

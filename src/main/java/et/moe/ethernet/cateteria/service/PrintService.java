@@ -29,7 +29,7 @@ public class PrintService {
         
         // Format current time
         String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("M/d/yyyy"));
+        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
         
         // Generate simplified receipt content with only requested fields - ensure UTF-8 encoding
         receipt.append("MOE CAFETERIA\n");
@@ -57,7 +57,7 @@ public class PrintService {
         
         // Format current time
         String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("M/d/yyyy"));
+        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
         
         // Generate simplified receipt content with only requested fields - ensure UTF-8 encoding
         receipt.append("MOE CAFETERIA\n");

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "meal_categories")
@@ -46,6 +47,9 @@ public class MealCategory {
     
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    @OneToMany(mappedBy = "mealCategory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MealItem> mealItems;
     
     @PrePersist
     protected void onCreate() {

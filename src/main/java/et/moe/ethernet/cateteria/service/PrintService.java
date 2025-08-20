@@ -42,8 +42,8 @@ public class PrintService {
         receipt.append("Date: ").append(currentDate).append("\n");
         receipt.append("Time: ").append(currentTime).append("\n");
         receipt.append("Employee: ").append(employee.getShortCode()).append("\n");
-        receipt.append("Meal Type: ").append(mealType.getName()).append("\n");
-        receipt.append("Meal Category: ").append(mealCategory.getName()).append("\n");
+        receipt.append("Meal Type: ").append(mealType.getName()).append("\n\n");
+        receipt.append("Meal Category: **").append(mealCategory.getName()).append("**\n\n");
         receipt.append("Actual Price: ").append(String.format("%.2f", mealRecord.getActualPrice())).append(" ETB\n");
         receipt.append("Thank you for using our service!\n");
         
@@ -73,7 +73,7 @@ public class PrintService {
         receipt.append("Time: ").append(currentTime).append("\n");
         receipt.append("Employee: ").append(employee.getShortCode()).append("\n");
         receipt.append("Meal Type: ").append(mealType.getName()).append("\n");
-        receipt.append("Meal Category: ").append(mealCategory.getName()).append("\n");
+        receipt.append("Meal Category: **").append(mealCategory.getName()).append("**\n");
         receipt.append("Actual Price: ").append(String.format("%.2f", mealRecord.getActualPrice())).append(" ETB\n");
         receipt.append("Thank you for using our service!\n");
         

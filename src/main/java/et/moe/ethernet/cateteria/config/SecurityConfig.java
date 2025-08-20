@@ -35,16 +35,16 @@ public class SecurityConfig {
                 // Public API endpoints (with context path) - allow both authenticated and anonymous
                 .requestMatchers("/meal-types/active").permitAll()
                 .requestMatchers("/meal-categories/active").permitAll()
-                .requestMatchers("/meal-categories/by-type/**").permitAll()
-                .requestMatchers("/meal-categories/**").permitAll() // Allow access to individual meal categories
-                .requestMatchers("/employees/by-card/**").permitAll()
-                .requestMatchers("/employees/by-code/**").permitAll()
+                .requestMatchers("/meal-categories/by-type/{mealTypeId}").permitAll()
+                .requestMatchers("/meal-categories/{id}").permitAll() // Allow access to individual meal categories
+                .requestMatchers("/employees/by-card/{cardId}").permitAll()
+                .requestMatchers("/employees/by-code/{code}").permitAll()
                 .requestMatchers("/meal-records/record").permitAll()
                 .requestMatchers("/meal-records/check-duplicate").permitAll()
-                .requestMatchers("/meal-records/**/receipt").permitAll()
+                .requestMatchers("/meal-records/{id}/receipt").permitAll()
                 .requestMatchers("/support-config").permitAll()
-                .requestMatchers("/support-reports/**").permitAll()
-                .requestMatchers("/api/print/**").permitAll()
+                .requestMatchers("/support-reports/{id}").permitAll()
+                .requestMatchers("/api/print/{endpoint}").permitAll()
                 // All other endpoints require authentication
                 .anyRequest().authenticated()
             )

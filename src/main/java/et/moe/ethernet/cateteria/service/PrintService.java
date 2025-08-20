@@ -3,6 +3,8 @@ package et.moe.ethernet.cateteria.service;
 import et.moe.ethernet.cateteria.dto.MealRecordDto;
 import et.moe.ethernet.cateteria.dto.EmployeeDto;
 import et.moe.ethernet.cateteria.dto.MealCategoryDto;
+import et.moe.ethernet.cateteria.dto.MealTypeDto;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ public class PrintService {
     
     private final EmployeeService employeeService;
     private final MealCategoryService mealCategoryService;
+    private final MealTypeService mealTypeService;
     
     public String generateReceiptText(MealRecordDto mealRecord) {
         StringBuilder receipt = new StringBuilder();
@@ -26,6 +29,8 @@ public class PrintService {
         
         MealCategoryDto mealCategory = mealCategoryService.getMealCategoryById(mealRecord.getMealCategoryId())
             .orElseThrow(() -> new RuntimeException("Meal category not found"));
+        MealTypeDto mealType = mealTypeService.getMealTypeById(mealRecord.getMealTypeId())
+            .orElseThrow(() -> new RuntimeException("Meal type not found"));
         
         // Format current time
         String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
@@ -37,7 +42,7 @@ public class PrintService {
         receipt.append("Date: ").append(currentDate).append("\n");
         receipt.append("Time: ").append(currentTime).append("\n");
         receipt.append("Employee: ").append(employee.getShortCode()).append("\n");
-        receipt.append("Meal Type: ").append(mealRecord.getMealTypeId()).append("\n");
+        receipt.append("Meal Type: ").append(mealType.getName()).append("\n");
         receipt.append("Meal Category: ").append(mealCategory.getName()).append("\n");
         receipt.append("Actual Price: ").append(String.format("%.2f", mealRecord.getActualPrice())).append(" ETB\n");
         receipt.append("Thank you for using our service!\n");
@@ -54,6 +59,8 @@ public class PrintService {
         
         MealCategoryDto mealCategory = mealCategoryService.getMealCategoryById(mealRecord.getMealCategoryId())
             .orElseThrow(() -> new RuntimeException("Meal category not found"));
+         MealTypeDto mealType = mealTypeService.getMealTypeById(mealRecord.getMealTypeId())
+            .orElseThrow(() -> new RuntimeException("Meal category not found"));
         
         // Format current time
         String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
@@ -65,7 +72,7 @@ public class PrintService {
         receipt.append("Date: ").append(currentDate).append("\n");
         receipt.append("Time: ").append(currentTime).append("\n");
         receipt.append("Employee: ").append(employee.getShortCode()).append("\n");
-        receipt.append("Meal Type: ").append(mealRecord.getMealTypeId()).append("\n");
+        receipt.append("Meal Type: ").append(mealType.getName()).append("\n");
         receipt.append("Meal Category: ").append(mealCategory.getName()).append("\n");
         receipt.append("Actual Price: ").append(String.format("%.2f", mealRecord.getActualPrice())).append(" ETB\n");
         receipt.append("Thank you for using our service!\n");

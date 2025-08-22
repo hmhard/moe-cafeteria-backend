@@ -28,6 +28,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(authz -> authz
+                // Allow public access to uploaded files (must be first)
+                .requestMatchers("/api/uploads/**").permitAll()
                 // Swagger UI endpoints (without context path)
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
                 // Auth endpoints (with context path)
@@ -37,6 +39,8 @@ public class SecurityConfig {
                 .requestMatchers("/meal-categories/active").permitAll()
                 .requestMatchers("/meal-categories/by-type/{mealTypeId}").permitAll()
                 .requestMatchers("/meal-categories/{id}").permitAll() // Allow access to individual meal categories
+                .requestMatchers("/meal-items/active").permitAll() // Allow access to active meal items
+                .requestMatchers("/meal-items/by-category/{mealCategoryId}").permitAll() // Allow access to meal items by category
                 .requestMatchers("/employees/by-card/{cardId}").permitAll()
                 .requestMatchers("/employees/by-code/{code}").permitAll()
                 .requestMatchers("/meal-records/record").permitAll()

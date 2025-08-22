@@ -11,7 +11,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -21,6 +27,18 @@ import java.util.List;
 public class MealItemController {
     
     private final MealItemService mealItemService;
+    private static final Path UPLOAD_DIR = Paths.get("uploads");
+    
+    private String saveFile(MultipartFile file) throws IOException {
+        if (!Files.exists(UPLOAD_DIR)) {
+            Files.createDirectories(UPLOAD_DIR);
+        }
+        String original = file.getOriginalFilename() != null ? file.getOriginalFilename() : "file";
+        String filename = Instant.now().toEpochMilli() + "-" + original.replaceAll("[^a-zA-Z0-9.-]", "_");
+        Path target = UPLOAD_DIR.resolve(filename);
+        Files.copy(file.getInputStream(), target);
+        return "/uploads/" + filename;
+    }
     
     @GetMapping
     @Operation(
@@ -79,39 +97,58 @@ public class MealItemController {
             .orElse(ResponseEntity.notFound().build());
     }
     
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     @Operation(
         summary = "Create a new meal item",
-        description = "Create a new meal item with image upload, name, color, status, and total available. Requires manager role."
+        description = "Create a new meal item with optional image upload."
     )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Meal item created successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid request data"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
-        @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
-    })
-    public ResponseEntity<MealItemDto> createMealItem(@RequestBody CreateMealItemRequest request) {
-        try {
-            MealItemDto createdItem = mealItemService.createMealItem(request);
-            return ResponseEntity.status(201).body(createdItem);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<MealItemDto> createMealItemMultipart(
+        @RequestPart("name") String name,
+        @RequestPart(value = "description", required = false) String description,
+        @RequestPart("mealCategoryId") String mealCategoryId,
+        @RequestPart(value = "color", required = false) String color,
+        @RequestPart(value = "totalAvailable", required = false) Integer totalAvailable,
+        @RequestPart(value = "isActive", required = false) Boolean isActive,
+        @RequestPart(value = "file", required = false) MultipartFile file
+    ) throws IOException {
+        CreateMealItemRequest req = new CreateMealItemRequest();
+        req.setName(name);
+        req.setDescription(description);
+        req.setMealCategoryId(mealCategoryId);
+        req.setColor(color);
+        req.setTotalAvailable(totalAvailable);
+        req.setActive(isActive != null ? isActive : true);
+        if (file != null && !file.isEmpty()) {
+            String url = saveFile(file);
+            req.setImageUrl(url);
         }
+        MealItemDto created = mealItemService.createMealItem(req);
+        return ResponseEntity.status(201).body(created);
     }
     
-    @PutMapping("/{id}")
-    @Operation(
-        summary = "Update a meal item",
-        description = "Update an existing meal item. Requires manager role."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Meal item updated successfully"),
-        @ApiResponse(responseCode = "404", description = "Meal item not found"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
-        @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions")
-    })
-    public ResponseEntity<MealItemDto> updateMealItem(@PathVariable String id, @RequestBody MealItem mealItemUpdates) {
-        return mealItemService.updateMealItem(id, mealItemUpdates)
+    @PutMapping(value = "/{id}")
+    @Operation(summary = "Update a meal item", description = "Update a meal item, allowing optional image upload.")
+    public ResponseEntity<MealItemDto> updateMealItem(
+        @PathVariable String id,
+        @RequestParam(value = "name", required = false) String name,
+        @RequestParam(value = "description", required = false) String description,
+        @RequestParam(value = "mealCategoryId", required = false) String mealCategoryId,
+        @RequestParam(value = "color", required = false) String color,
+        @RequestParam(value = "totalAvailable", required = false) Integer totalAvailable,
+        @RequestParam(value = "isActive", required = false) Boolean isActive,
+        @RequestParam(value = "file", required = false) MultipartFile file
+    ) throws IOException {
+        MealItem updates = new MealItem();
+        updates.setName(name);
+        updates.setDescription(description);
+        updates.setColor(color);
+        updates.setTotalAvailable(totalAvailable);
+        if (isActive != null) updates.setActive(isActive);
+        if (file != null && !file.isEmpty()) {
+            String url = saveFile(file);
+            updates.setImageUrl(url);
+        }
+        return mealItemService.updateMealItem(id, updates)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }

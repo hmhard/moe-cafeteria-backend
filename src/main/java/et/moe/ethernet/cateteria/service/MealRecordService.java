@@ -3,8 +3,12 @@ package et.moe.ethernet.cateteria.service;
 import et.moe.ethernet.cateteria.dto.MealRecordDto;
 import et.moe.ethernet.cateteria.dto.EmployeeDto;
 import et.moe.ethernet.cateteria.dto.MealCategoryDto;
+import et.moe.ethernet.cateteria.dto.MealRecordItemDto;
+import et.moe.ethernet.cateteria.dto.RecordMealWithItemsRequest;
 import et.moe.ethernet.cateteria.entity.*;
 import et.moe.ethernet.cateteria.repository.MealRecordRepository;
+import et.moe.ethernet.cateteria.repository.MealRecordItemRepository;
+import et.moe.ethernet.cateteria.repository.MealItemRepository;
 import et.moe.ethernet.cateteria.repository.SupportConfigRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -23,6 +27,8 @@ import java.util.stream.Collectors;
 public class MealRecordService {
     
     private final MealRecordRepository mealRecordRepository;
+    private final MealRecordItemRepository mealRecordItemRepository;
+    private final MealItemRepository mealItemRepository;
     private final EmployeeService employeeService;
     private final MealCategoryService mealCategoryService;
     private final SupportConfigRepository supportConfigRepository;
@@ -54,7 +60,31 @@ public class MealRecordService {
     
     public Optional<MealRecordDto> getMealRecordById(String id) {
         return mealRecordRepository.findById(id)
-            .map(MealRecordDto::fromEntity);
+            .map(mealRecord -> {
+                MealRecordDto dto = MealRecordDto.fromEntity(mealRecord);
+                // Load meal items for this record
+                List<MealRecordItem> mealRecordItems = mealRecordItemRepository.findByMealRecordIdOrderByCreatedAtAsc(id);
+                List<MealRecordItemDto> mealItemDtos = mealRecordItems.stream()
+                    .map(MealRecordItemDto::fromEntity)
+                    .collect(Collectors.toList());
+                dto.setMealItems(mealItemDtos);
+                return dto;
+            });
+    }
+
+    public MealRecordDto addItemsToExistingRecord(String mealRecordId, List<RecordMealWithItemsRequest.SelectedMealItem> selectedItems, BigDecimal pricePerItem) {
+        MealRecord mealRecord = mealRecordRepository.findById(mealRecordId)
+            .orElseThrow(() -> new RuntimeException("Meal record not found"));
+        if (selectedItems == null || selectedItems.isEmpty()) {
+            return MealRecordDto.fromEntity(mealRecord);
+        }
+        saveMealRecordItems(mealRecord, selectedItems, pricePerItem);
+        // return with items populated
+        MealRecordDto dto = MealRecordDto.fromEntity(mealRecord);
+        List<MealRecordItemDto> items = mealRecordItemRepository.findByMealRecordIdOrderByCreatedAtAsc(mealRecordId)
+            .stream().map(MealRecordItemDto::fromEntity).collect(Collectors.toList());
+        dto.setMealItems(items);
+        return dto;
     }
     
     public boolean hasUsedMealTypeToday(String cardId, String mealTypeId) {
@@ -64,6 +94,10 @@ public class MealRecordService {
     }
     
     public MealRecordDto recordMeal(String cardId, String mealCategoryId) {
+        return recordMealWithItems(cardId, mealCategoryId, null);
+    }
+    
+    public MealRecordDto recordMealWithItems(String cardId, String mealCategoryId, List<RecordMealWithItemsRequest.SelectedMealItem> selectedItems) {
         // Find employee by card ID
         Employee employee = employeeService.getEmployeeByCardId(cardId)
             .map(this::mapToEmployeeEntity)
@@ -110,6 +144,12 @@ public class MealRecordService {
         }
         
         MealRecord savedRecord = mealRecordRepository.save(mealRecord);
+        
+        // Save meal items if provided
+        if (selectedItems != null && !selectedItems.isEmpty()) {
+            saveMealRecordItems(savedRecord, selectedItems, pricing.actualPrice);
+        }
+        
         return MealRecordDto.fromEntity(savedRecord);
     }
     
@@ -167,6 +207,24 @@ public class MealRecordService {
         mealCategory.setMealType(mealType);
         
         return mealCategory;
+    }
+    
+    private void saveMealRecordItems(MealRecord mealRecord, List<RecordMealWithItemsRequest.SelectedMealItem> selectedItems, BigDecimal pricePerItem) {
+        for (RecordMealWithItemsRequest.SelectedMealItem selectedItem : selectedItems) {
+            // Find the meal item
+            MealItem mealItem = mealItemRepository.findById(selectedItem.getMealItemId())
+                .orElseThrow(() -> new RuntimeException("Meal item not found: " + selectedItem.getMealItemId()));
+            
+            // Create meal record item
+            MealRecordItem mealRecordItem = new MealRecordItem();
+            mealRecordItem.setMealRecord(mealRecord);
+            mealRecordItem.setMealItem(mealItem);
+            mealRecordItem.setQuantity(selectedItem.getQuantity());
+            mealRecordItem.setPricePerItem(pricePerItem);
+            mealRecordItem.setTotalPrice(pricePerItem.multiply(BigDecimal.valueOf(selectedItem.getQuantity())));
+            
+            mealRecordItemRepository.save(mealRecordItem);
+        }
     }
     
     private static class MealPricing {

@@ -44,6 +44,21 @@ public class PrintService {
         receipt.append("Employee: ").append(employee.getShortCode()).append("\n");
         receipt.append("Meal Type: ").append(mealType.getName()).append("\n\n");
         receipt.append("Meal Category: **").append(mealCategory.getName()).append("**\n\n");
+        
+        // Add meal items if available
+        if (mealRecord.getMealItems() != null && !mealRecord.getMealItems().isEmpty()) {
+            receipt.append("SELECTED ITEMS:\n");
+            double totalPrice = 0.0;
+            for (var mealItem : mealRecord.getMealItems()) {
+                double itemTotal = mealItem.getPricePerItem().doubleValue() * mealItem.getQuantity();
+                totalPrice += itemTotal;
+                receipt.append(mealItem.getMealItemName())
+                      .append(" x").append(mealItem.getQuantity())
+                      .append(" - ").append(String.format("%.2f", itemTotal)).append(" ETB\n");
+            }
+            receipt.append("\nTOTAL: ").append(String.format("%.2f", totalPrice)).append(" ETB\n\n");
+        }
+        
         receipt.append("Actual Price: ").append(String.format("%.2f", mealRecord.getActualPrice())).append(" ETB\n");
         receipt.append("Thank you for using our service!\n");
         
@@ -74,6 +89,21 @@ public class PrintService {
         receipt.append("Employee: ").append(employee.getShortCode()).append("\n");
         receipt.append("Meal Type: ").append(mealType.getName()).append("\n");
         receipt.append("Meal Category: **").append(mealCategory.getName()).append("**\n");
+        
+        // Add meal items if available
+        if (mealRecord.getMealItems() != null && !mealRecord.getMealItems().isEmpty()) {
+            receipt.append("SELECTED ITEMS:\n");
+            double totalPrice = 0.0;
+            for (var mealItem : mealRecord.getMealItems()) {
+                double itemTotal = mealItem.getPricePerItem().doubleValue() * mealItem.getQuantity();
+                totalPrice += itemTotal;
+                receipt.append(mealItem.getMealItemName())
+                      .append(" x").append(mealItem.getQuantity())
+                      .append(" - ").append(String.format("%.2f", itemTotal)).append(" ETB\n");
+            }
+            receipt.append("\nTOTAL: ").append(String.format("%.2f", totalPrice)).append(" ETB\n\n");
+        }
+        
         receipt.append("Actual Price: ").append(String.format("%.2f", mealRecord.getActualPrice())).append(" ETB\n");
         receipt.append("Thank you for using our service!\n");
         

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -35,6 +36,9 @@ public class MealRecordDto {
     private String recordedByUsername;
     private String recordedByFullName;
     
+    // Meal items information
+    private List<MealRecordItemDto> mealItems;
+    
     public static MealRecordDto fromEntity(MealRecord mealRecord) {
         return new MealRecordDto(
             mealRecord.getId(),
@@ -55,7 +59,8 @@ public class MealRecordDto {
             mealRecord.getOrderNumber(),
             mealRecord.getRecordedByUser() != null ? mealRecord.getRecordedByUser().getId() : null,
             mealRecord.getRecordedByUser() != null ? mealRecord.getRecordedByUser().getUsername() : null,
-            mealRecord.getRecordedByUser() != null ? mealRecord.getRecordedByUser().getFullName() : null
+            mealRecord.getRecordedByUser() != null ? mealRecord.getRecordedByUser().getFullName() : null,
+            null // mealItems will be set separately
         );
     }
 } 

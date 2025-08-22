@@ -1,6 +1,7 @@
 package et.moe.ethernet.cateteria.controller;
 
 import et.moe.ethernet.cateteria.dto.MealRecordDto;
+import et.moe.ethernet.cateteria.dto.RecordMealWithItemsRequest;
 import et.moe.ethernet.cateteria.service.MealRecordService;
 import et.moe.ethernet.cateteria.service.PrintService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -205,6 +206,70 @@ public class MealRecordController {
         }
     }
     
+    @PostMapping("/record-with-items")
+    @Operation(
+        summary = "Record a meal transaction with selected items",
+        description = "Record a meal transaction for an employee with specific meal items selected. This endpoint is publicly accessible for meal recording."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully recorded meal with items", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = MealRecordDto.class)
+        )),
+        @ApiResponse(responseCode = "400", description = "Bad request - Employee not found, meal already recorded today, or meal item not found"),
+        @ApiResponse(responseCode = "404", description = "Employee or meal category not found")
+    })
+    public ResponseEntity<Object> recordMealWithItems(
+        @Parameter(description = "Meal record with items request")
+        @RequestBody RecordMealWithItemsRequest request
+    ) {
+        if (request.getCardId() == null || request.getMealCategoryId() == null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "Missing required parameters: cardId and mealCategoryId"
+            ));
+        }
+        
+        try {
+            MealRecordDto record = mealRecordService.recordMealWithItems(
+                request.getCardId(), 
+                request.getMealCategoryId(), 
+                request.getSelectedItems()
+            );
+            return ResponseEntity.ok(record);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", e.getMessage()
+            ));
+        }
+    }
+    
+    @PostMapping("/{id}/items")
+    @Operation(
+        summary = "Attach selected items to an existing meal record",
+        description = "Saves selected meal items for a meal record before printing."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully saved items"),
+        @ApiResponse(responseCode = "404", description = "Meal record not found"),
+        @ApiResponse(responseCode = "400", description = "Bad request")
+    })
+    public ResponseEntity<Object> addItemsToRecord(
+        @Parameter(description = "Meal record UUID") @PathVariable String id,
+        @RequestBody RecordMealWithItemsRequest request
+    ) {
+        try {
+            if (request.getSelectedItems() == null || request.getSelectedItems().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "No items provided"));
+            }
+            // Use actualPrice from the existing record as per-category price per item
+            MealRecordDto base = mealRecordService.getMealRecordById(id).orElseThrow(() -> new RuntimeException("Meal record not found"));
+            MealRecordDto updated = mealRecordService.addItemsToExistingRecord(id, request.getSelectedItems(), base.getActualPrice());
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/{id}/receipt")
     @Operation(
         summary = "Get receipt text for a meal record",

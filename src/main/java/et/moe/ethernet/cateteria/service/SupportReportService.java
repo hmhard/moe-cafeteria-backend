@@ -142,6 +142,44 @@ public class SupportReportService {
         );
     }
     
+    // New: Meal Category Usage
+    public List<MealCategoryUsage> getMealCategoryUsage(String period) {
+        LocalDateTime startDate = getStartDateForPeriod(period);
+        LocalDateTime endDate = LocalDateTime.now();
+        
+        List<MealRecord> records = mealRecordRepository.findByRecordedAtBetween(startDate, endDate);
+        
+        Map<String, List<MealRecord>> byCategoryId = records.stream()
+            .collect(Collectors.groupingBy(r -> r.getMealCategory().getId()));
+        
+        return byCategoryId.entrySet().stream().map(entry -> {
+            String categoryId = entry.getKey();
+            List<MealRecord> recs = entry.getValue();
+            String categoryName = recs.isEmpty() ? "" : recs.get(0).getMealCategory().getName();
+            String mealTypeId = recs.isEmpty() ? "" : recs.get(0).getMealType().getId();
+            String mealTypeName = recs.isEmpty() ? "" : recs.get(0).getMealType().getName();
+            
+            int totalMeals = recs.size();
+            int supportedMeals = (int) recs.stream().filter(r -> r.getPriceType() == MealRecord.PriceType.SUPPORTED).count();
+            int normalMeals = totalMeals - supportedMeals;
+            BigDecimal totalRevenue = recs.stream().map(MealRecord::getActualPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal totalSubsidy = recs.stream().map(MealRecord::getSupportAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            return new MealCategoryUsage(
+                categoryId,
+                categoryName,
+                mealTypeId,
+                mealTypeName,
+                totalMeals,
+                supportedMeals,
+                normalMeals,
+                totalRevenue.doubleValue(),
+                totalSubsidy.doubleValue()
+            );
+        }).sorted((a,b) -> Integer.compare(b.getTotalMeals(), a.getTotalMeals()))
+          .collect(Collectors.toList());
+    }
+    
     private DepartmentSupportAnalysis createDepartmentAnalysis(String department, List<Employee> employees, List<MealRecord> records) {
         int totalEmployees = employees.size();
         int eligibleEmployees = (int) employees.stream()
@@ -314,5 +352,41 @@ public class SupportReportService {
         public int getTotalPages() { return totalPages; }
         public int getCurrentPage() { return currentPage; }
         public int getPageSize() { return pageSize; }
+    }
+    
+    // New DTO: MealCategoryUsage
+    public static class MealCategoryUsage {
+        private final String mealCategoryId;
+        private final String mealCategoryName;
+        private final String mealTypeId;
+        private final String mealTypeName;
+        private final int totalMeals;
+        private final int supportedMeals;
+        private final int normalMeals;
+        private final double totalRevenue;
+        private final double totalSubsidy;
+        
+        public MealCategoryUsage(String mealCategoryId, String mealCategoryName, String mealTypeId, String mealTypeName,
+                                 int totalMeals, int supportedMeals, int normalMeals, double totalRevenue, double totalSubsidy) {
+            this.mealCategoryId = mealCategoryId;
+            this.mealCategoryName = mealCategoryName;
+            this.mealTypeId = mealTypeId;
+            this.mealTypeName = mealTypeName;
+            this.totalMeals = totalMeals;
+            this.supportedMeals = supportedMeals;
+            this.normalMeals = normalMeals;
+            this.totalRevenue = totalRevenue;
+            this.totalSubsidy = totalSubsidy;
+        }
+        
+        public String getMealCategoryId() { return mealCategoryId; }
+        public String getMealCategoryName() { return mealCategoryName; }
+        public String getMealTypeId() { return mealTypeId; }
+        public String getMealTypeName() { return mealTypeName; }
+        public int getTotalMeals() { return totalMeals; }
+        public int getSupportedMeals() { return supportedMeals; }
+        public int getNormalMeals() { return normalMeals; }
+        public double getTotalRevenue() { return totalRevenue; }
+        public double getTotalSubsidy() { return totalSubsidy; }
     }
 } 

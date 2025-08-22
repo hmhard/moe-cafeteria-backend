@@ -42,4 +42,11 @@ public class SupportReportController {
         SupportReportService.PaginatedDepartmentAnalysis analysis = supportReportService.getPaginatedDepartmentAnalysis(period, page, size);
         return ResponseEntity.ok(analysis);
     }
+    
+    @GetMapping("/category-usage")
+    @Operation(summary = "Get meal category usage", description = "Get usage per meal category for a given period")
+    public ResponseEntity<List<SupportReportService.MealCategoryUsage>> getMealCategoryUsage(
+            @RequestParam(defaultValue = "monthly") String period) {
+        return ResponseEntity.ok(supportReportService.getMealCategoryUsage(period));
+    }
 } 
